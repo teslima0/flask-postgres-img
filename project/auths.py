@@ -1,11 +1,18 @@
 from flask import request,Blueprint,jsonify,make_response
-from .models import User,UserSchema,users_schema
+from .models import User,UserSchema,user_schema
 from flask_jwt_extended import create_access_token, jwt_required,get_jwt_identity
 from .import db,app
 import bcrypt
 import cloudinary
 auths=Blueprint('auths',__name__)
 
+
+@auths.route("/upload", methods=["POST"])
+def upload_image():
+
+    file = request.files['file']
+    result = cloudinary.uploader.upload(file, folder="image")
+    return {"url": result["secure_url"]}
 
 @auths.route("/register", methods=["POST"])
 def register():
@@ -17,12 +24,12 @@ def register():
     password=user_data['password']
   
    
-    #hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     errors = user_schema.validate(user_data)
 
     if errors:
         return {"message": "Validation errors", "errors": errors}, 400
-    new_user = User(username=username, email=email, password= password)    
+    new_user = User(username=username, email=email, password=hashed_password)    
     db.session.add(new_user)
     db.session.commit()
     return user_schema.jsonify(new_user)
@@ -38,6 +45,6 @@ def login():
     result=user_serializer.dump(user)
     if not user:
         return make_response(jsonify('User Not Found!'), 404)
-    #if bcrypt.checkpw(password.encode('utf-8'), user):
-    access_token = create_access_token(identity=result)  
-    return make_response(jsonify(access_token=access_token))
+    if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+        access_token = create_access_token(identity=result)  
+        return make_response(jsonify(access_token=access_token))

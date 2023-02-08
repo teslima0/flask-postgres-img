@@ -14,20 +14,29 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % str(self.id)
 
-
-
-
+   
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), nullable=False)
-    description = db.Column(db.Text)
-    qty = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    image_url = db.Column(db.String(500))
-    user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(100), unique=True)
+    description = db.Column(db.String(200))
+    price = db.Column(db.Float)
+    qty = db.Column(db.Integer)
+    image_url = db.Column(db.String(800))
+    
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('products', lazy=True))
+    
+
+    def __init__(self, name, description, price, qty, user, image_url):
+        self.name = name
+        self.description = description
+        self.price = price
+        self.qty = qty
+        self.user = user
+        self.image_url = image_url
 
     def __repr__(self):
-        return '<Product %r>' % self.name
+        return '<Product %r>' % self.id
 
 
 

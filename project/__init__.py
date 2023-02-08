@@ -15,10 +15,8 @@ def create_app():
     #app= Flask(__name__)
     #db = SQLAlchemy()
     app.config['SECRET_KEY']= os.getenv('SECRET_KEY')
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///project1.db" 
-    #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://yvrnqmyb:7i1N-Uqi9EH1WaMvASvQ7o1qPjmvXIci@isilo.db.elephantsql.com/flask-img'
-
-    
+    #app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///project.db" 
+    app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql+pymysql://root:@localhost/flask-img' 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
    
     db.init_app(app)
@@ -36,6 +34,8 @@ def create_app():
     with app.app_context():
         db.create_all()
 
+
+    
     #register view
     from .views import views
     from .auths import auths
